@@ -1,8 +1,9 @@
 from machine import ADC, Pin
-import time
 
 # Define all six ADC-capable pins used on ESP32
 adc_pins = [ADC(Pin(i)) for i in (0, 1, 2, 3, 4, 5)]
+digital_pins = [Pin(i, Pin.IN, Pin.PULL_UP) for i in (6,7,21,20)]
+
 
 # Apply attenuation for full-scale voltage support (11 dB)
 for adc in adc_pins:
@@ -31,6 +32,8 @@ def scale_input(raw_value, in_range=(0, 65535), out_range=(-100, 100),
 
 while True:
     scaled_values = [scale_input(adc.read_u16(), invert=True) for adc in adc_pins]
-    print("DATA: " + ",".join(f"{val:4d}" for val in scaled_values))
-    time.sleep(0.2)
-
+    digital_values = [1 - pin.value() for pin in digital_pins]
+    
+    print("|DATA|" + "|".join(f"{val:4d}" for val in scaled_values) + 
+          "|   " + "|   ".join(f"{val}" for val in digital_values) + "|")
+  
